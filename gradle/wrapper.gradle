@@ -1,0 +1,12 @@
+import groovy.json.JsonSlurper
+
+tasks.withType(Wrapper) {
+    distributionType = Wrapper.DistributionType.ALL
+    doFirst {
+        def versionService = new URL('https://services.gradle.org/versions/current')
+        gradleVersion = new JsonSlurper().parse(versionService).version as String
+    }
+    doLast {
+        println "gradleVersion: ${gradleVersion}, distributionType: ${distributionType}"
+    }
+}

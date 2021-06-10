@@ -1,0 +1,7 @@
+buildscript {
+    dependencies {
+        classpath localGroovy()
+    }
+}
+
+apply from: 'gradle/wrapper.gradle'
