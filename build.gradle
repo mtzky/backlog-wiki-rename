@@ -1,3 +1,5 @@
+import groovy.transform.Memoized
+
 buildscript {
     dependencies {
         classpath localGroovy()
@@ -27,6 +29,7 @@ application {
 }
 
 run {
+    environment << getConfProperties('env.properties')
     systemProperty 'java.util.logging.config.file', file('src/conf/logging.properties')
 }
 
@@ -44,7 +47,17 @@ tasks.withType(JavaCompile) {
 
 tasks.withType(Test) {
     useJUnitPlatform()
+    environment << getConfProperties('env.properties')
     systemProperty 'java.util.logging.config.file', file('src/test/resources/logging.properties')
+}
+
+@Memoized
+Properties getConfProperties(propName) {
+    def filePath = "src/conf/${propName}"
+    // println "getConfProperties('${filePath}')"
+    def props = new Properties()
+    file(filePath).withInputStream { props.load(it) }
+    return props
 }
 
 apply from: 'gradle/wrapper.gradle'
