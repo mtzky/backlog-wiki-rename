@@ -2,9 +2,14 @@ import groovy.json.JsonSlurper
 
 tasks.withType(Wrapper) {
     distributionType = Wrapper.DistributionType.ALL
-    doFirst {
+    outputs.upToDateWhen {
         def versionService = new URL('https://services.gradle.org/versions/current')
-        gradleVersion = new JsonSlurper().parse(versionService).version as String
+        def currentVersion = new JsonSlurper().parse(versionService).version as String
+        if (gradleVersion == currentVersion) {
+            return true
+        }
+        gradleVersion = currentVersion
+        return false
     }
     doLast {
         println "gradleVersion: ${gradleVersion}, distributionType: ${distributionType}"
