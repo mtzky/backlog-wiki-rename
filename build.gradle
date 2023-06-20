@@ -35,9 +35,8 @@ run {
 
 java {
     toolchain {
-        languageVersion = JavaLanguageVersion.of(11)
-        vendor = JvmVendorSpec.ADOPTOPENJDK
-        implementation = JvmImplementation.VENDOR_SPECIFIC
+        languageVersion = JavaLanguageVersion.of(17)
+        vendor = JvmVendorSpec.ADOPTIUM
     }
 }
 
