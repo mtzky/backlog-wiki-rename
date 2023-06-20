@@ -38,7 +38,7 @@ class RenameTest {
     }
 
     @Test
-    void main() throws Throwable {
+    void mainMethod() throws Throwable {
         Rename.main(args);
     }
 
