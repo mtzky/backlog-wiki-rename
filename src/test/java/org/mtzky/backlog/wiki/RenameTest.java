@@ -1,6 +1,8 @@
 package org.mtzky.backlog.wiki;
 
+import com.nulabinc.backlog4j.Wiki;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.io.InputStreamReader;
@@ -38,6 +40,19 @@ class RenameTest {
     @Test
     void main() throws Throwable {
         Rename.main(args);
+    }
+
+    @Test
+    @Disabled
+    void listWikis() throws Throwable {
+        new AppBacklogClient(new AppConfig())
+                .getWikis()
+                .stream()
+                .map(Wiki::getName)
+                // .filter(n -> n.startsWith("foo/bar"))
+                .sorted()
+                .map("%1$s=baz/%1$s"::formatted)
+                .forEach(System.out::println);
     }
 
 }
