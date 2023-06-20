@@ -31,6 +31,10 @@ application {
 run {
     environment << getConfProperties('env.properties')
     systemProperty 'java.util.logging.config.file', file('src/conf/logging.properties')
+    jvmArgs = [
+            '--add-opens', 'java.base/sun.net.www.protocol.https=ALL-UNNAMED',
+            '--add-opens', 'java.base/java.net=ALL-UNNAMED',
+    ]
 }
 
 java {
@@ -48,6 +52,10 @@ tasks.withType(Test).configureEach {
     useJUnitPlatform()
     environment << getConfProperties('env.properties')
     systemProperty 'java.util.logging.config.file', file('src/test/resources/logging.properties')
+    jvmArgs = [
+            '--add-opens', 'java.base/sun.net.www.protocol.https=ALL-UNNAMED',
+            '--add-opens', 'java.base/java.net=ALL-UNNAMED',
+    ]
 }
 
 @Memoized
