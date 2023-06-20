@@ -15,7 +15,7 @@ repositories {
 }
 
 dependencies {
-    implementation 'com.nulab-inc:backlog4j:2.5.0'
+    implementation 'com.nulab-inc:backlog4j:2.5.2'
     runtimeOnly 'org.slf4j:slf4j-jdk14:1.7.36'
 
     testImplementation platform('org.junit:junit-bom:5.9.3')
