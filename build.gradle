@@ -1,27 +1,14 @@
 import groovy.transform.Memoized
 
-buildscript {
-    dependencies {
-        classpath localGroovy()
-    }
-}
-
 plugins {
+    id 'latest-wrapper'
+    id 'java-conventions'
     id 'application'
-}
-
-repositories {
-    mavenCentral()
 }
 
 dependencies {
     implementation 'com.nulab-inc:backlog4j:2.5.3'
     runtimeOnly 'org.slf4j:slf4j-jdk14:1.7.36'
-
-    testImplementation platform('org.junit:junit-bom:5.10.1')
-    testImplementation 'org.junit.jupiter:junit-jupiter-api'
-    testImplementation 'org.junit.jupiter:junit-jupiter-params'
-    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
 }
 
 application {
@@ -37,19 +24,7 @@ run {
     ]
 }
 
-java {
-    toolchain {
-        languageVersion = JavaLanguageVersion.of(21)
-        vendor = JvmVendorSpec.ADOPTIUM
-    }
-}
-
-tasks.withType(JavaCompile).configureEach {
-    options.encoding = 'UTF-8'
-}
-
 tasks.withType(Test).configureEach {
-    useJUnitPlatform()
     environment << getConfProperties('env.properties')
     systemProperty 'java.util.logging.config.file', file('src/test/resources/logging.properties')
     jvmArgs = [
@@ -66,5 +41,3 @@ Properties getConfProperties(propName) {
     file(filePath).withInputStream { props.load(it) }
     return props
 }
-
-apply from: 'gradle/wrapper.gradle'
