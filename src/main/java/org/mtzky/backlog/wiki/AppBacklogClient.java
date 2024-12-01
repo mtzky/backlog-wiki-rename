@@ -7,9 +7,9 @@ import com.nulabinc.backlog4j.Wiki;
 import com.nulabinc.backlog4j.api.option.GetParams;
 import com.nulabinc.backlog4j.api.option.QueryParams;
 import com.nulabinc.backlog4j.api.option.UpdateWikiParams;
-import com.nulabinc.backlog4j.http.BacklogHttpClientImpl;
 import com.nulabinc.backlog4j.http.BacklogHttpResponse;
 import com.nulabinc.backlog4j.http.NameValuePair;
+import com.nulabinc.backlog4j.http.httpclient.HttpClientBacklogHttpClient;
 
 import java.net.MalformedURLException;
 import java.util.List;
@@ -45,7 +45,7 @@ public class AppBacklogClient {
         return client.updateWiki(params);
     }
 
-    private static class AppBacklogHttpClient extends BacklogHttpClientImpl {
+    private static class AppBacklogHttpClient extends HttpClientBacklogHttpClient {
 
         private static final System.Logger LOG = System.getLogger(AppBacklogHttpClient.class.getName());
         private static final int MAX_ATTEMPTS = 3;
