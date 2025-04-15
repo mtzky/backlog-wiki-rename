@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.io.InputStreamReader;
+import java.io.StringWriter;
 import java.util.Optional;
 import java.util.Properties;
 import java.util.stream.Stream;
@@ -45,14 +46,21 @@ class RenameTest {
     @Test
     @Disabled
     void listWikis() throws Throwable {
+        final var output = new StringWriter();
         new AppBacklogClient(new AppConfig())
                 .getWikis()
                 .stream()
                 .map(Wiki::getName)
                 // .filter(n -> n.startsWith("foo/bar"))
-                .sorted()
-                .map("%1$s=baz/%1$s"::formatted)
-                .forEach(System.out::println);
+                .collect(Properties::new, (p, name) -> {
+                    final var renamedName = "baz/" + name;
+                    p.setProperty(name, renamedName);
+                }, Properties::putAll)
+                .store(output, """
+                         suppress inspection "UnusedProperty" for whole file
+                         suppress inspection "NonAsciiCharacters" for whole file
+                        """.stripTrailing());
+        System.out.println(output);
     }
 
 }
