@@ -1,15 +1,22 @@
 package org.mtzky.backlog.wiki;
 
-import com.nulabinc.backlog4j.Wiki;
 import com.nulabinc.backlog4j.api.option.UpdateWikiParams;
 import com.nulabinc.backlog4j.http.NameValuePair;
 import org.mtzky.backlog.wiki.client.AppBacklogClient;
 import org.mtzky.backlog.wiki.config.AppEnvConfig;
 
+import java.util.Arrays;
+import java.util.Properties;
+
 import static java.lang.System.Logger.Level.DEBUG;
 import static java.lang.System.Logger.Level.INFO;
-import static java.util.stream.Collectors.joining;
+import static java.lang.System.Logger.Level.WARNING;
+import static java.nio.charset.StandardCharsets.UTF_8;
+import static java.nio.file.Files.newBufferedWriter;
+import static java.nio.file.StandardOpenOption.CREATE;
 import static java.util.stream.Collectors.toSet;
+import static org.mtzky.backlog.wiki.WikiNameMapping.MAPPING_FILE_KEY;
+import static org.mtzky.backlog.wiki.WikiNameMapping.MAPPING_FILE_PATH;
 
 public class Rename implements Runnable {
 
@@ -23,25 +30,42 @@ public class Rename implements Runnable {
         this.mapping = mapping;
     }
 
-    public static void main(final String... args) {
+    public static void main(final String... args) throws Throwable {
         final var config = new AppEnvConfig();
         final var client = new AppBacklogClient(config);
-        final var mapping = new WikiNameMapping(args);
+
+        final var mapping = new WikiNameMapping()
+                .file(MAPPING_FILE_PATH)
+                .args(args);
+        if (mapping.isEmpty()) {
+            LOG.log(
+                    WARNING,
+                    "No mapping found. args={0}, {1}={2}",
+                    Arrays.toString(args),
+                    MAPPING_FILE_KEY,
+                    MAPPING_FILE_PATH
+            );
+
+            final var mappingProperties = new Properties();
+            for (final var wiki : client.getWikis()) {
+                final var name = wiki.getName();
+                mappingProperties.put(name, name);
+            }
+
+            try (final var w = newBufferedWriter(MAPPING_FILE_PATH, UTF_8, CREATE)) {
+                mappingProperties.store(w, """
+                        suppress inspection "NonAsciiCharacters" for whole file
+                        """.stripTrailing());
+            }
+
+            return;
+        }
 
         new Rename(client, mapping).run();
     }
 
     @Override
     public void run() {
-        if (mapping.isEmpty()) {
-            final var delimiter = System.lineSeparator();
-            final var wikiNames = client.getWikis().stream()
-                    .map(Wiki::getName)
-                    .collect(joining(delimiter));
-            LOG.log(INFO, "list of Wiki names:{0}{1}", delimiter, wikiNames);
-            return;
-        }
-
         for (final var wiki : client.getWikis()) {
             final var id = wiki.getId();
             final var oldName = wiki.getName();

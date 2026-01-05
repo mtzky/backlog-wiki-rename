@@ -1,12 +1,16 @@
 package org.mtzky.backlog.wiki;
 
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
+import java.nio.file.Path;
 import java.util.stream.IntStream;
 
+import static java.util.Objects.requireNonNull;
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -14,62 +18,134 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class WikiNameMappingTest {
 
-    @ParameterizedTest
-    @CsvSource({
-            "foo [[bar]] bar [[bar/baz]] qux, foo [[BAR]] bar [[bar/baz]] qux"
-    })
-    void replaceAll(final String input, final String expected) {
-        final var mapping = new WikiNameMapping("bar", "BAR");
+    private final WikiNameMapping sut = new WikiNameMapping();
 
-        final var actual = mapping.replaceAll(input);
+    @Nested
+    class replaceAll {
 
-        assertEquals(expected, actual);
+        @ParameterizedTest
+        @CsvSource({
+                "foo [[bar]] bar [[bar/baz]] qux, foo [[BAR]] bar [[bar/baz]] qux"
+        })
+        void linkUpdated(final String input, final String expected) {
+            sut.args("bar", "BAR");
+
+            final var actual = sut.replaceAll(input);
+
+            assertEquals(expected, actual);
+        }
+
     }
 
-    @ParameterizedTest
-    @CsvSource({
-            "k1, true, v1",
-            "k2, true, v2",
-            "K2, false, ",
-            "k4, false, ",
-    })
-    void getNewName(final String key, final boolean present, final String expectedValue) {
-        final var mapping = new WikiNameMapping("k1", "v1", "k2", "v2", "k3", "v3");
-        final var actual = mapping.getNewName(key);
+    @Nested
+    class args {
 
-        assertFalse(mapping.isEmpty());
-        assertEquals(present, actual.isPresent());
-        assertEquals(expectedValue, actual.orElse(null));
-    }
+        @ParameterizedTest
+        @CsvSource({
+                "k1, v1",
+                "k2, v2"
+        })
+        void matched(final String key, final String expectedValue) {
+            sut.args("k1", "v1", "k2", "v2", "k3", "v3");
 
-    @Test
-    void sameKey() {
-        final var mapping = new WikiNameMapping("same-key", "1st-value", "same-key", "2nd-value");
-        final var actual = mapping.getNewName("same-key");
+            final var actual = sut.getNewName(key);
 
-        assertFalse(mapping.isEmpty());
-        assertTrue(actual.isPresent());
-        assertEquals("2nd-value", actual.get());
-    }
+            assertAll(
+                    () -> assertFalse(sut.isEmpty()),
+                    () -> assertEquals(expectedValue, actual.orElseThrow())
+            );
+        }
 
-    @Test
-    void noArguments() {
-        final var mapping = new WikiNameMapping();
-        final var any = mapping.getNewName(null);
+        @ParameterizedTest
+        @CsvSource({
+                "K2",
+                "k4",
+        })
+        void notMatched(final String key) {
+            sut.args("k1", "v1", "k2", "v2", "k3", "v3");
 
-        assertTrue(mapping.isEmpty());
-        assertFalse(any.isPresent());
-    }
+            final var actual = sut.getNewName(key);
 
-    @ParameterizedTest
-    @ValueSource(ints = {1, 3, 5})
-    void invalidArgumentLength(final int argsLength) {
-        final var actual = assertThrows(IllegalArgumentException.class, () -> {
+            assertAll(
+                    () -> assertFalse(sut.isEmpty()),
+                    () -> assertFalse(actual.isPresent())
+            );
+        }
+
+        @Test
+        void sameKey() {
+            sut.args("same-key", "1st-value", "same-key", "2nd-value");
+
+            final var actual = sut.getNewName("same-key");
+
+            assertAll(
+                    () -> assertFalse(sut.isEmpty()),
+                    () -> assertEquals("2nd-value", actual.orElseThrow())
+            );
+        }
+
+        @Test
+        void sameValue() {
+            sut.args("same-kv", "same-kv");
+
+            final var actual = sut.getNewName("same-kv");
+
+            assertAll(
+                    () -> assertTrue(sut.isEmpty()),
+                    () -> assertFalse(actual.isPresent())
+            );
+        }
+
+        @Test
+        void empty() {
+            sut.args();
+
+            final var actual = sut.getNewName(null);
+
+            assertAll(
+                    () -> assertTrue(sut.isEmpty()),
+                    () -> assertFalse(actual.isPresent())
+            );
+        }
+
+        @ParameterizedTest
+        @ValueSource(ints = {1, 3, 5})
+        void invalidArgumentLength(final int argsLength) {
             final var args = IntStream.range(0, argsLength).mapToObj(Integer::toString).toArray(String[]::new);
-            new WikiNameMapping(args);
-        });
 
-        assertEquals("Invalid argument length: " + argsLength, actual.getMessage());
+            final var actual = assertThrows(IllegalArgumentException.class, () -> sut.args(args));
+
+            assertEquals("Invalid argument length: " + argsLength, actual.getMessage());
+        }
+
+    }
+
+    @Nested
+    class file {
+
+        @Test
+        void properties() throws Throwable {
+            final var mappingFileName = "WikiNameMappingTest.properties";
+            final var mappingFileUri = requireNonNull(WikiNameMappingTest.class.getResource(mappingFileName)).toURI();
+            final var mappingFilePath = Path.of(mappingFileUri);
+
+            sut.file(mappingFilePath);
+
+            assertAll(
+                    () -> assertFalse(sut.isEmpty()),
+                    () -> assertEquals("bar", sut.getNewName("foo").orElseThrow()),
+                    () -> assertFalse(sut.getNewName("baz").isPresent()),
+                    () -> assertFalse(sut.getNewName("qux").isPresent())
+            );
+        }
+
+        @Test
+        void noSuchFile() {
+            sut.file(Path.of("no-such-file.properties"));
+
+            assertTrue(sut.isEmpty());
+        }
+
     }
 
 }

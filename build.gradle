@@ -26,4 +26,5 @@ tasks.withType(Test).configureEach {
     systemProperty 'user.language', 'en'
     systemProperty 'user.country', 'US'
     systemProperty 'java.util.logging.config.file', file('src/conf/logging-test.properties')
+    systemProperty 'org.mtzky.backlog.wiki.mapping.file', file('src/conf/mapping-test.properties')
 }
