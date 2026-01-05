@@ -1,9 +1,8 @@
-import groovy.transform.Memoized
-
 plugins {
     id 'latest-wrapper'
     id 'java-conventions'
     id 'application'
+    id 'co.uzzu.dotenv.gradle' version '4.0.0'
 }
 
 dependencies {
@@ -16,20 +15,11 @@ application {
 }
 
 run {
-    environment << getConfProperties('env.properties')
+    environment << env.allVariables()
     systemProperty 'java.util.logging.config.file', file('src/conf/logging.properties')
 }
 
 tasks.withType(Test).configureEach {
-    environment << getConfProperties('env.properties')
+    environment << env.allVariables()
     systemProperty 'java.util.logging.config.file', file('src/conf/logging-test.properties')
-}
-
-@Memoized
-Properties getConfProperties(propName) {
-    def filePath = "src/conf/${propName}"
-    // println "getConfProperties('${filePath}')"
-    def props = new Properties()
-    file(filePath).withInputStream { props.load(it) }
-    return props
 }
