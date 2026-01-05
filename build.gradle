@@ -22,7 +22,7 @@ run {
 
 tasks.withType(Test).configureEach {
     environment << getConfProperties('env.properties')
-    systemProperty 'java.util.logging.config.file', file('src/test/resources/logging.properties')
+    systemProperty 'java.util.logging.config.file', file('src/conf/logging-test.properties')
 }
 
 @Memoized
