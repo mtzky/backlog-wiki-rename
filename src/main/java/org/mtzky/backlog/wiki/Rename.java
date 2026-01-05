@@ -76,7 +76,8 @@ public class Rename implements Runnable {
 
             final var wikiDetail = client.getWiki(id);
             final var oldContent = wikiDetail.getContent();
-            final var newContent = mapping.replaceAll(oldContent);
+            final var wikiParser = new WikiParser(oldContent);
+            final var newContent = wikiParser.migrateLinks(mapping);
             if (!newContent.equals(oldContent)) {
                 params.content(newContent);
             }

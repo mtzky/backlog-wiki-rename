@@ -21,23 +21,6 @@ class WikiNameMappingTest {
     private final WikiNameMapping sut = new WikiNameMapping();
 
     @Nested
-    class replaceAll {
-
-        @ParameterizedTest
-        @CsvSource({
-                "foo [[bar]] bar [[bar/baz]] qux, foo [[BAR]] bar [[bar/baz]] qux"
-        })
-        void linkUpdated(final String input, final String expected) {
-            sut.args("bar", "BAR");
-
-            final var actual = sut.replaceAll(input);
-
-            assertEquals(expected, actual);
-        }
-
-    }
-
-    @Nested
     class args {
 
         @ParameterizedTest

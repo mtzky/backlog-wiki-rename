@@ -8,7 +8,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Properties;
-import java.util.regex.Pattern;
 
 import static java.lang.System.Logger.Level.INFO;
 import static java.nio.charset.StandardCharsets.UTF_8;
@@ -22,7 +21,6 @@ public class WikiNameMapping {
     ));
 
     private static final System.Logger LOG = System.getLogger(WikiNameMapping.class.getName());
-    private static final Pattern WIKI_LINK_PATTERN = Pattern.compile("\\[\\[([^]]*)]]");
 
     private final Map<String, String> mapping = new HashMap<>();
 
@@ -32,14 +30,6 @@ public class WikiNameMapping {
 
     public Optional<String> getNewName(String nameToRename) {
         return Optional.ofNullable(mapping.get(nameToRename));
-    }
-
-    public String replaceAll(final String content) {
-        final var matcher = WIKI_LINK_PATTERN.matcher(content);
-        return matcher.replaceAll(result -> getNewName(result.group(1))
-                .map("[[%s]]"::formatted)
-                .orElseGet(result::group)
-        );
     }
 
     WikiNameMapping file(final Path mappingFilePath) {

@@ -14,7 +14,16 @@ application {
     mainClass.set('org.mtzky.backlog.wiki.Rename')
 }
 
-run {
+['Rename', 'CheckDeadLink'].forEach { name ->
+    tasks.register("run${name}", JavaExec) {
+        it.description = "Runs ${name} as a JVM application"
+        it.group = ApplicationPlugin.APPLICATION_GROUP
+        classpath = sourceSets.main.runtimeClasspath
+        mainClass.set("org.mtzky.backlog.wiki.${name}")
+    }
+}
+
+tasks.withType(JavaExec).configureEach {
     environment << env.allVariables()
     systemProperty 'user.language', 'en'
     systemProperty 'user.country', 'US'
