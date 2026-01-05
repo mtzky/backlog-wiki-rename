@@ -4,6 +4,8 @@ import com.nulabinc.backlog4j.Wiki;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.mtzky.backlog.wiki.client.AppBacklogClient;
+import org.mtzky.backlog.wiki.config.AppEnvConfig;
 
 import java.io.InputStreamReader;
 import java.io.StringWriter;
@@ -39,7 +41,7 @@ class RenameTest {
     }
 
     @Test
-    void mainMethod() throws Throwable {
+    void mainMethod() {
         Rename.main(args);
     }
 
@@ -47,7 +49,7 @@ class RenameTest {
     @Disabled
     void listWikis() throws Throwable {
         final var output = new StringWriter();
-        new AppBacklogClient(new AppConfig())
+        new AppBacklogClient(new AppEnvConfig())
                 .getWikis()
                 .stream()
                 .map(Wiki::getName)

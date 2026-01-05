@@ -1,4 +1,4 @@
-package org.mtzky.backlog.wiki;
+package org.mtzky.backlog.wiki.client;
 
 import com.nulabinc.backlog4j.BacklogAPIException;
 import com.nulabinc.backlog4j.BacklogClientFactory;
@@ -7,6 +7,8 @@ import com.nulabinc.backlog4j.api.option.UpdateWikiParams;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mtzky.backlog.wiki.config.AppConfig;
+import org.mtzky.backlog.wiki.config.AppEnvConfig;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -16,24 +18,21 @@ import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 class AppBacklogClientTest {
 
-    private static final AppConfig CONFIG = new AppConfig();
+    private static final AppConfig CONFIG = new AppEnvConfig();
     private static long projectId;
 
     private AppBacklogClient client;
 
     @BeforeAll
-    static void beforeAll() throws Throwable {
-        final var configure = CONFIG.getSpaceType()
-                .newBacklogConfigure(CONFIG.getSpaceId())
-                .apiKey(CONFIG.getApiKey());
-        projectId = new BacklogClientFactory(configure)
+    static void beforeAll() {
+        projectId = new BacklogClientFactory(CONFIG.configure())
                 .newClient()
-                .getProject(CONFIG.getProjectIdOrKey())
+                .getProject(CONFIG.projectIdOrKey())
                 .getId();
     }
 
     @BeforeEach
-    void setUp() throws Throwable {
+    void setUp() {
         client = new AppBacklogClient(CONFIG);
     }
 

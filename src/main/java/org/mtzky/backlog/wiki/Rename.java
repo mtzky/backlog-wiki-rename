@@ -3,6 +3,8 @@ package org.mtzky.backlog.wiki;
 import com.nulabinc.backlog4j.Wiki;
 import com.nulabinc.backlog4j.api.option.UpdateWikiParams;
 import com.nulabinc.backlog4j.http.NameValuePair;
+import org.mtzky.backlog.wiki.client.AppBacklogClient;
+import org.mtzky.backlog.wiki.config.AppEnvConfig;
 
 import static java.lang.System.Logger.Level.DEBUG;
 import static java.lang.System.Logger.Level.INFO;
@@ -21,8 +23,8 @@ public class Rename implements Runnable {
         this.mapping = mapping;
     }
 
-    public static void main(final String... args) throws Exception {
-        final var config = new AppConfig();
+    public static void main(final String... args) {
+        final var config = new AppEnvConfig();
         final var client = new AppBacklogClient(config);
         final var mapping = new WikiNameMapping(args);
 
