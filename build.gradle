@@ -16,10 +16,14 @@ application {
 
 run {
     environment << env.allVariables()
+    systemProperty 'user.language', 'en'
+    systemProperty 'user.country', 'US'
     systemProperty 'java.util.logging.config.file', file('src/conf/logging.properties')
 }
 
 tasks.withType(Test).configureEach {
     environment << env.allVariables()
+    systemProperty 'user.language', 'en'
+    systemProperty 'user.country', 'US'
     systemProperty 'java.util.logging.config.file', file('src/conf/logging-test.properties')
 }
