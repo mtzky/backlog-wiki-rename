@@ -12,7 +12,9 @@ class WikiParserTest {
 
     @ParameterizedTest
     @CsvSource({
-            "foo [[bar]] bar [[bar/baz]] qux, foo [[BAR]] bar [[bar/baz]] qux"
+            "foo [[bar]] bar [[bar/baz]] qux, foo [[BAR]] bar [[bar/baz]] qux",
+            "[[Dollar$sign]], [[Dollar$sign]]",
+            "[[Back\\slash]], [[Back\\slash]]",
     })
     void linksMigrated(final String input, final String expected) {
         final var mapping = new WikiNameMapping().args("bar", "BAR");
